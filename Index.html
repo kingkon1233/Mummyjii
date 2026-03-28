@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mummy Jii - Maa ke haath ka swad</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --primary: #c1773a; --dark: #2c3e50; --beige: #fdfaf6; --shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--beige); color: var(--dark); padding-bottom: 100px; }
+        .top-bar { background: white; padding: 15px; text-align: center; border-bottom: 3px solid var(--primary); position: sticky; top: 0; z-index: 1002; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .top-bar h1 { font-family: 'Playfair Display', serif; margin: 0; color: var(--primary); font-size: 1.8rem; letter-spacing: 1px; }
+        .hero { width: 100%; background: #fff; overflow: hidden; border-bottom: 1px solid #eee; }
+        .hero-img { width: 100%; height: auto; display: block; object-fit: contain; }
+        .section-title { padding: 40px 25px 10px; font-weight: 600; font-size: 1.4rem; color: var(--primary); border-bottom: 3px solid var(--primary); display: inline-block; margin-left: 25px; }
+        .grid { display: grid; grid-template-columns: 1fr; gap: 30px; padding: 30px 25px; }
+        @media(min-width: 768px) { .grid { grid-template-columns: 1fr 1fr; } }
+        .card { background: white; border-radius: 25px; overflow: hidden; box-shadow: var(--shadow); transition: 0.3s; cursor: pointer; position: relative; }
+        .card img { width: 100%; height: 230px; object-fit: cover; }
+        .card-info { padding: 20px; }
+        .price-tag { color: var(--primary); font-weight: 600; font-size: 1.2rem; margin-top: 5px; }
+        .badge { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.9); padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .coming-soon { opacity: 0.7; cursor: not-allowed; }
+        .cs-badge { background: var(--dark) !important; color: white !important; }
+        .popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: none; z-index: 2000; overflow-y: auto; animation: slideUp 0.4s ease-out; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .close-btn { position: absolute; top: 20px; left: 20px; width: 40px; height: 40px; background: white; border-radius: 50%; border: none; font-size: 18px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); cursor: pointer; z-index: 2001; }
+        .btn { padding: 16px; border-radius: 12px; border: none; font-weight: 600; font-size: 1rem; width: 100%; cursor: pointer; margin-top: 10px; }
+        .btn-cart { background: var(--primary); color: white; }
+        .btn-buy { background: var(--dark); color: white; }
+        .del-notice { background: #fff3e0; color: #e65100; padding: 10px; text-align: center; font-size: 0.85rem; font-weight: 600; border-radius: 10px; margin-bottom: 15px; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee; }
+        .remove-btn { color: #e74c3c; border: none; background: #ffeaea; padding: 6px 10px; border-radius: 8px; font-size: 12px; }
+        .order-summary-box { background: #fff9f4; padding: 20px; border-radius: 15px; margin: 20px 0; border: 1px dashed var(--primary); }
+        input, textarea { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #eee; border-radius: 10px; box-sizing: border-box; }
+        .cart-bar { position: fixed; bottom: 0; width: 100%; background: white; padding: 15px 25px; display: none; justify-content: space-between; align-items: center; box-shadow: 0 -8px 25px rgba(0,0,0,0.1); z-index: 999; border-top-left-radius: 20px; border-top-right-radius: 20px; box-sizing: border-box; }
+        .footer { text-align: center; padding: 50px 20px; color: #888; font-size: 0.95rem; line-height: 1.6; }
+        .heart-icon { color: #e74c3c; display: inline-block; animation: heartBeat 1.2s infinite; font-size: 1.2rem; }
+        @keyframes heartBeat { 0%, 20%, 40% { transform: scale(1); } 10%, 30% { transform: scale(1.2); } }
+        
+        /* Coupon Style */
+        .coupon-box { margin-top: 10px; display: flex; gap: 5px; }
+        .coupon-box input { margin: 0; flex: 1; text-transform: lowercase; }
+        .coupon-box button { background: var(--primary); color: white; border: none; border-radius: 8px; padding: 0 15px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="top-bar"><h1>Mummy Jii</h1></div>
+<div class="hero"><img src="https://i.ibb.co/zhbzK7kv/1774691451527.png" class="hero-img"></div>
+
+<div class="section-title">Hamare Specials</div>
+<div class="grid" id="grid"></div>
+
+<div class="section-title">Coming Soon</div>
+<div class="grid" id="csGrid"></div>
+
+<div class="popup" id="pPop">
+    <button class="close-btn" onclick="closePop('pPop')">✕</button>
+    <img id="pImg" style="width:100%; height:320px; object-fit:cover;">
+    <div style="padding:25px;">
+        <h2 id="pName" style="margin:0; font-family:'Playfair Display'"></h2>
+        <div id="pWeight" style="color:gray; margin-bottom:10px;"></div>
+        <p id="pDesc" style="line-height:1.6; color:#555;"></p>
+        <div id="pPrice" style="font-size:1.6rem; font-weight:600; color:var(--primary); margin-bottom:20px;"></div>
+        <div style="display:flex; align-items:center; gap:20px; margin-bottom:20px;">
+            <span>Quantity:</span>
+            <button onclick="updateQ(-1)" style="width:35px; height:35px; border-radius:50%; border:1px solid var(--primary); background:none; color:var(--primary);">-</button>
+            <b id="qVal">1</b>
+            <button onclick="updateQ(1)" style="width:35px; height:35px; border-radius:50%; border:1px solid var(--primary); background:none; color:var(--primary);">+</button>
+        </div>
+        <button class="btn btn-cart" onclick="addToCart()">Basket mein Daalein</button>
+        <button class="btn btn-buy" onclick="quickBuy()">Direct Order Karein</button>
+    </div>
+</div>
+
+<div class="popup" id="cartPop">
+    <button class="close-btn" onclick="closePop('cartPop')">✕</button>
+    <div style="padding:25px; margin-top:50px;">
+        <div class="del-notice" id="cartDelNotice">Free delivery on order over ₹399</div>
+        <h2 style="font-family:'Playfair Display'">Aapki Basket</h2>
+        <div id="cartList"></div>
+        
+        <div class="coupon-box" id="couponField">
+            <input type="text" id="couponInput" placeholder="Coupon Code">
+            <button onclick="applyCoupon()">Apply</button>
+        </div>
+        <p id="couponMsg" style="font-size:0.8rem; margin:5px 0; font-weight:600;"></p>
+
+        <div style="margin-top:20px;">
+            <div id="cartSummary" style="font-size:1rem; border-top:1px solid #eee; padding-top:15px;"></div>
+            <button class="btn btn-buy" onclick="openCheckout()">Checkout Karein</button>
+        </div>
+    </div>
+</div>
+
+<div class="popup" id="fPop">
+    <button class="close-btn" onclick="closePop('fPop')">✕</button>
+    <div style="padding:25px; margin-top:50px;">
+        <h3>Delivery Details</h3>
+        <input type="text" id="uName" placeholder="Pura Naam">
+        <input type="tel" id="uPhone" placeholder="WhatsApp Number">
+        <textarea id="uAddr" rows="3" placeholder="Pura Pata (Ghar no., Gali, Area)"></textarea>
+        <input type="text" id="uPin" placeholder="Pincode">
+        <div class="order-summary-box" id="finalSummary"></div>
+        <button class="btn btn-buy" onclick="sendOrder()">WhatsApp par Confirm Karein</button>
+    </div>
+</div>
+
+<div class="cart-bar" id="cBar" onclick="viewBasket()">
+    <div style="cursor:pointer"><div style="font-size:0.8rem; color:gray">Basket Dekhein 🛒</div><div id="tAmt" style="font-size:1.3rem; font-weight:600; color:var(--primary)">₹0</div></div>
+    <button class="btn btn-buy" style="width:auto; padding:10px 25px; margin:0">Order Karein</button>
+</div>
+
+<div class="footer">Bana hai poore <span class="heart-icon">❤️</span> se...<br>Just like mom makes for you.<br><br><b>Mummy Jii Homemade Snacks</b></div>
+
+<script>
+    const wa = "916299265507";
+    const data = [
+        { name: "Aloo Chips", weight: "100g", price: 49, img: "https://i.ibb.co/0y2vSkNv/1774690991088.png", desc: "Hand-sliced potato chips.", status: "active" },
+        { name: "Thekua", weight: "400g", price: 199, img: "https://i.ibb.co/5XKFJMMz/1774691005741.png", desc: "Traditional crispy thekua.", status: "active" },
+        { name: "Pirukiya", weight: "400g", price: 219, img: "https://i.ibb.co/cXCvYj6y/1774691018132.png", desc: "Sweet dumplings with suji.", status: "active" },
+        { name: "Gur Badam Patti", weight: "400g", price: 199, img: "https://i.ibb.co/8nnkq7jF/1774691033410.png", desc: "Healthy peanut jaggery brittle.", status: "active" },
+        { name: "Besan Ladoo", weight: "900g", price: 199, img: "https://i.ibb.co/cK1yS9Pz/1774691046309.png", desc: "Pure ghee Besan Ladoo.", status: "soon" },
+        { name: "Sattu Ladoo", weight: "400g", price: 219, img: "https://i.ibb.co/CKH6j8DC/1774691061344.png", desc: "Energy packed Sattu Ladoo.", status: "soon" }
+    ];
+
+    let cart = [], curItem = null, curQ = 1, discount = 0;
+
+    function render() {
+        let activeH = "";
+        let soonH = "";
+        data.forEach((p, i) => {
+            let card = `<div class="card ${p.status==='soon'?'coming-soon':''}" ${p.status==='active'?`onclick="openItem(${i})"`:''}>
+                <img src="${p.img}"><div class="badge ${p.status==='soon'?'cs-badge':''}">${p.status==='soon'?'Soon':p.weight}</div>
+                <div class="card-info"><h4>${p.name}</h4><div class="price-tag">₹${p.price}</div></div>
+            </div>`;
+            p.status === 'active' ? activeH += card : soonH += card;
+        });
+        document.getElementById('grid').innerHTML = activeH;
+        document.getElementById('csGrid').innerHTML = soonH;
+    }
+
+    function openItem(i) {
+        curItem = data[i]; curQ = 1; document.getElementById('qVal').innerText = 1;
+        document.getElementById('pImg').src = curItem.img;
+        document.getElementById('pName').innerText = curItem.name;
+        document.getElementById('pWeight').innerText = "Vajan: " + curItem.weight;
+        document.getElementById('pDesc').innerText = curItem.desc;
+        document.getElementById('pPrice').innerText = "₹" + curItem.price;
+        document.getElementById('pPop').style.display = "block";
+    }
+
+    function closePop(id) { document.getElementById(id).style.display = "none"; }
+    function updateQ(v) { curQ = Math.max(1, curQ + v); document.getElementById('qVal').innerText = curQ; }
+
+    function addToCart() { cart.push({...curItem, q: curQ}); updateTotal(); closePop('pPop'); }
+
+    function getTotals() {
+        let itemsTotal = cart.reduce((s, i) => s + (i.price * i.q), 0);
+        let delCharge = (itemsTotal < 399 && itemsTotal > 0) ? 39 : 0;
+        let grandTotal = itemsTotal + delCharge - discount;
+        return { itemsTotal, delCharge, grandTotal: Math.max(0, grandTotal) };
+    }
+
+    function updateTotal() {
+        discount = 0; // Reset discount on any cart change
+        document.getElementById('couponMsg').innerText = "";
+        document.getElementById('couponInput').value = "";
+        let { grandTotal } = getTotals();
+        document.getElementById('tAmt').innerText = "₹" + grandTotal;
+        document.getElementById('cBar').style.display = cart.length > 0 ? "flex" : "none";
+    }
+
+    function applyCoupon() {
+        let code = document.getElementById('couponInput').value.toLowerCase().trim();
+        let { itemsTotal } = getTotals();
+        let msg = document.getElementById('couponMsg');
+
+        if(code === "mummyjii") {
+            if(itemsTotal > 100) {
+                discount = 29; msg.style.color = "green"; msg.innerText = "YAY! ₹29 Off applied.";
+            } else {
+                msg.style.color = "red"; msg.innerText = "Kam se kam ₹100 ka order karein."; discount = 0;
+            }
+        } else if (code === "get30") {
+            if(itemsTotal > 0) {
+                discount = 30; msg.style.color = "green"; msg.innerText = "YAY! ₹30 Off applied.";
+            } else {
+                msg.style.color = "red"; msg.innerText = "Invalid request."; discount = 0;
+            }
+        } else {
+            msg.style.color = "red"; msg.innerText = "Invalid Code!"; discount = 0;
+        }
+        viewBasket();
+    }
+
+    function viewBasket() {
+        let h = "";
+        cart.forEach((item, index) => {
+            h += `<div class="cart-item">
+                <div><b>${item.name}</b><br><small>${item.q} x ₹${item.price} = ₹${item.q * item.price}</small></div>
+                <button class="remove-btn" onclick="removeItem(${index})">Hatao 🗑️</button>
+            </div>`;
+        });
+        let { itemsTotal, delCharge, grandTotal } = getTotals();
+        document.getElementById('cartList').innerHTML = h || "<p>Khali hai!</p>";
+        document.getElementById('cartSummary').innerHTML = `
+            <div style="display:flex; justify-content:space-between"><span>Items Total:</span><span>₹${itemsTotal}</span></div>
+            <div style="display:flex; justify-content:space-between; color:${delCharge>0?'red':'green'}">
+                <span>Delivery Charge:</span><span>${delCharge > 0 ? '₹'+delCharge : 'FREE'}</span>
+            </div>
+            ${discount > 0 ? `<div style="display:flex; justify-content:space-between; color:green"><span>Discount:</span><span>-₹${discount}</span></div>` : ''}
+            <div style="display:flex; justify-content:space-between; font-size:1.4rem; font-weight:600; margin-top:10px;">
+                <span>Total:</span><span>₹${grandTotal}</span>
+            </div>`;
+        document.getElementById('cartPop').style.display = "block";
+    }
+
+    function removeItem(index) { cart.splice(index, 1); updateTotal(); viewBasket(); if(cart.length === 0) closePop('cartPop'); }
+
+    function openCheckout() {
+        closePop('cartPop');
+        let { itemsTotal, delCharge, grandTotal } = getTotals();
+        let s = "<b>Order Summary:</b><br>";
+        cart.forEach(i => { s += `• ${i.name} (x${i.q})<br>`; });
+        s += `<br>Items: ₹${itemsTotal}<br>Delivery: ${delCharge>0?'₹'+delCharge:'FREE'}`;
+        if(discount > 0) s += `<br>Discount: -₹${discount}`;
+        s += `<br><b>Grand Total: ₹${grandTotal}</b>`;
+        document.getElementById('finalSummary').innerHTML = s;
+        document.getElementById('fPop').style.display = "block";
+    }
+
+    function quickBuy() { cart = []; addToCart(); openCheckout(); }
+
+    function sendOrder() {
+        let n = document.getElementById('uName').value, p = document.getElementById('uPhone').value, a = document.getElementById('uAddr').value;
+        if(!n || !p || !a) return alert("Kripya saari details bharein!");
+        
+        let { itemsTotal, delCharge, grandTotal } = getTotals();
+        let items = ""; cart.forEach(i => { items += `• ${i.name} x ${i.q}%0A`; });
+        let msg = `*NEW ORDER FROM MUMMY JII*%0A%0AName: ${n}%0APhone: ${p}%0AAddress: ${a}%0A%0A*Items:*%0A${items}%0AItems Total: ₹${itemsTotal}%0ADelivery: ${delCharge>0?'₹'+delCharge:'FREE'}%0A${discount > 0 ? 'Discount: -₹' + discount + '%0A' : ''}*Grand Total: ₹${grandTotal}*`;
+        
+        window.open(`https://wa.me/${wa}?text=${msg}`);
+        
+        cart = [];
+        discount = 0;
+        updateTotal();
+        closePop('fPop');
+    }
+
+    render();
+</script>
+</body>
+</html>
